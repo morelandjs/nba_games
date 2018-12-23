@@ -10,7 +10,6 @@ import pandas as pd
 import requests
 from xdg import XDG_DATA_HOME
 
-import numpy as np
 
 cachedir = Path(XDG_DATA_HOME, 'nba')
 cachedir.mkdir(parents=True, exist_ok=True)
@@ -108,7 +107,11 @@ def pull_games(season_min, season_max):
     for loc in ['home', 'away']:
         city = f'{loc}_city'
         team = f'{loc}_team'
+
+        # every name follows the pattern: city [city] team
+        # except for the Portland Trail Blazers
         table[city], table[team] = table[team].str.rsplit(' ', 1).str
+        table[city] = table[city].str.replace('Portland Trail', 'Portland')
 
     table.replace('', float('nan'), inplace=True)
     table.dropna(inplace=True)
@@ -122,16 +125,19 @@ def update_games(start=2018, stop=2018, rebuild=False, **kwargs):
     download the games and cache a new instance
 
     """
+    games = pull_games(start, stop)
+
     if not rebuild and cachefile.exists():
+        cached_games = pd.read_pickle(cachefile)
         games = pd.concat(
-            [pd.read_pickle(cachefile), pull_games(start, stop)]
+            [cached_games, games]
         ).drop_duplicates().reset_index(drop=True)
-    else:
-        games = pull_games(start, stop)
 
     games['date'] = pd.to_datetime(games['date'])
     games.sort_values('date', inplace=True)
     games.drop_duplicates(inplace=True)
+    print(games)
+
     games.to_pickle(cachefile)
 
 
