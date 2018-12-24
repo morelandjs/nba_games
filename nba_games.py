@@ -133,9 +133,13 @@ def update_games(start=2018, stop=2018, rebuild=False, **kwargs):
             [cached_games, games]
         ).drop_duplicates().reset_index(drop=True)
 
+    for col in ['home_points', 'away_points']:
+        games[col] = games[col].astype(int)
+
     games['date'] = pd.to_datetime(games['date'])
     games.sort_values('date', inplace=True)
     games.drop_duplicates(inplace=True)
+
     print(games)
 
     games.to_pickle(cachefile)
