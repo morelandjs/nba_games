@@ -148,7 +148,7 @@ def update_games(start=2018, stop=2018, rebuild=False, **kwargs):
 if __name__ == '__main__':
     import argparse
 
-    current_season = datetime.now().year + 1
+    current_season = datetime.now().year
 
     parser = argparse.ArgumentParser(
             description='pull NBA game scores from basketball-reference.com',
